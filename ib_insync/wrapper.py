@@ -42,6 +42,7 @@ class Wrapper(EWrapper):
         self.acctSummary = {}  # (account, tag, currency) -> AccountValue
         self.portfolio = defaultdict(dict)  # account -> conId -> PortfolioItem
         self.positions = defaultdict(dict)  # account -> conId -> Position
+        self.positionsModel = defaultdict(dict)
         self.trades = {}  # (client, orderId) or permId -> Trade
         self.fills = {}  # execId -> Fill
         self.newsTicks = []  # list of NewsTick
@@ -265,6 +266,25 @@ class Wrapper(EWrapper):
     @iswrapper
     def positionEnd(self):
         self._endReq('positions')
+
+    @iswrapper
+    def positionMulti(self, reqId, account, modelCode, contract, posSize, avgCost):
+        contract = Contract(**contract.__dict__)
+        position = Position(account, contract, posSize, avgCost)
+        positionsModel = self.positionsModel[modelCode]
+        if posSize == 0:
+            positionsModel.pop(contract.conId, None)
+        else:
+            positionsModel[contract.conId] = position
+        self._logger.info(f'position: {position}')
+        results = self._results.get('positionsModel')
+        self._ib.positionEvent.emit(position)
+        if results is not None:
+            results.append(position)
+
+    @iswrapper
+    def positionMultiEnd(self, reqId):
+        self._endReq(reqId)
 
     @iswrapper
     def pnl(self, reqId, dailyPnL, unrealizedPnL, realizedPnL):

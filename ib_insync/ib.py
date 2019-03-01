@@ -312,17 +312,21 @@ class IB:
         """
         return list(self.wrapper.accounts)
 
-    def accountValues(self, account: str = '') -> List[AccountValue]:
+    def accountValues(self, account: str='', modelCode: str='') -> List[AccountValue]:
         """
         List of account values for the given account,
         or of all accounts if account is left blank.
 
         Args:
             account: If specified, filter for this account name.
+            model: If specified, filter for this model name.
         """
         if account:
             return [v for v in self.wrapper.accountValues.values()
                     if v.account == account]
+        if modelCode:
+            return [v for v in self.wrapper.accountValues.values()
+                    if v.modelCode == modelCode]
         else:
             return list(self.wrapper.accountValues.values())
 
@@ -364,6 +368,17 @@ class IB:
             return list(self.wrapper.positions[account].values())
         else:
             return [v for d in self.wrapper.positions.values()
+                    for v in d.values()]
+
+    def positionsModel(self, modelCode: str='') -> List[Position]:
+        """
+        List of positions for the given account,
+        or of all accounts if account is left blank.
+        """
+        if modelCode:
+            return list(self.wrapper.positionsModel[modelCode].values())
+        else:
+            return [v for d in self.wrapper.positionsModel.values()
                     for v in d.values()]
 
     def pnl(self, account='', modelCode='') -> List[PnL]:
@@ -766,6 +781,16 @@ class IB:
         This method is blocking.
         """
         return self._run(self.reqPositionsAsync())
+
+    def reqPositionsModel(self, modelCode, account='') -> List[Position]:
+        """
+        It is recommended to use :py:meth:`.positionsModel` instead.
+
+        Request and return a list of positions for selected model and account.
+
+        This method is blocking.
+        """
+        return self.run(self.reqPositionsModelAsync(modelCode, account))
 
     def reqPnL(self, account: str, modelCode: str = '') -> PnL:
         """
@@ -1654,6 +1679,12 @@ class IB:
     def reqPositionsAsync(self):
         future = self.wrapper.startReq('positions')
         self.client.reqPositions()
+        return future
+
+    def reqPositionsModelAsync(self, modelCode, account):
+        reqId = self.client.getReqId()
+        future = self.wrapper.startReq(reqId)
+        self.client.reqPositionsMulti(reqId, account, modelCode)
         return future
 
     def reqContractDetailsAsync(self, contract):
