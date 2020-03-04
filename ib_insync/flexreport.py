@@ -79,7 +79,7 @@ class FlexReport:
         """
         return util.df(self.extract(topic, parseNumbers))
 
-    def download(self, token, queryId, fromDate, toDate):
+    def download(self, token, queryId):#, fromDate, toDate):
         """
         Download report for the given ``token`` and ``queryId``.
         """
@@ -88,8 +88,8 @@ class FlexReport:
         url = (
                 'https://gdcdyn.interactivebrokers.com'
                 f'/Universal/servlet/FlexStatementService.SendRequest?'
-                f't={token}&q={queryId}&v=3'
-                f'&fromDate={fromDate}&toDate={toDate}')
+                f't={token}&q={queryId}&v=3')
+#                f'&fromDate={fromDate}&toDate={toDate}')
         resp = urlopen(url)
         data = resp.read()
 
