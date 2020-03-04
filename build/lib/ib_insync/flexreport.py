@@ -83,8 +83,8 @@ class FlexReport:
         """
         Download report for the given ``token`` and ``queryId``.
         """
-        fromDate = fromDate.strftime()
-        toDate = toDate.strftime()
+#        fromDate = fromDate.strftime()
+#        toDate = toDate.strftime()
         url = (
                 'https://gdcdyn.interactivebrokers.com'
                 f'/Universal/servlet/FlexStatementService.SendRequest?'
